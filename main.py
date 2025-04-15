@@ -2,7 +2,7 @@ from astrbot.api.event import filter, AstrMessageEvent, MessageEventResult
 from astrbot.api.star import Context, Star, register
 from astrbot.api import logger
 
-image_url = "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcTsSXLPiTNHd6Is1HDd9hhrdzldpkHSngALZWzfBcepX9luzoeTfe_Zmiq0t9KpNnpNizA&usqp=CAU"
+image_url = "https://image20221016.oss-cn-shanghai.aliyuncs.com/images.jpg"
 
 @register("astrbot_plugin_hello-bye", "tinker", "一个简单的入群和退群信息提示插件", "1.0.0")
 class MyPlugin(Star):
@@ -36,7 +36,8 @@ class MyPlugin(Star):
             group_id = raw_message.get("group_id")
             user_id = raw_message.get("user_id")
             # 发送欢迎消息
-            welcome_message = f"欢迎新成员: {user_id}！✨✨✨"
+            welcome_message = f"✨✨✨ 欢迎新成员: {user_id} 进群！"
+            # logger.info(f"群 {group_id} 新成员 {user_id} 加入 url_image: {image_url}")
             yield event.make_result().message(welcome_message).url_image(image_url)
 
         elif raw_message.get("notice_type") == "group_decrease":
