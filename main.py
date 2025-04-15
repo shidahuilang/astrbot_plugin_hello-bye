@@ -2,6 +2,8 @@ from astrbot.api.event import filter, AstrMessageEvent, MessageEventResult
 from astrbot.api.star import Context, Star, register
 from astrbot.api import logger
 
+image_url = "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcTsSXLPiTNHd6Is1HDd9hhrdzldpkHSngALZWzfBcepX9luzoeTfe_Zmiq0t9KpNnpNizA&usqp=CAU"
+
 @register("astrbot_plugin_hello-bye", "tinker", "一个简单的入群和退群信息提示插件", "1.0.0")
 class MyPlugin(Star):
     def __init__(self, context: Context):
@@ -16,7 +18,7 @@ class MyPlugin(Star):
     @filter.event_message_type(filter.EventMessageType.ALL)
     async def handle_group_add(self, event: AstrMessageEvent):
         """处理所有类型的消息事件"""
-        logger.info(f"Received message_obj: {event.message_obj}")
+        # logger.info(f"Received message_obj: {event.message_obj}")
         # 没有 message_obj 或 raw_message 属性时，直接返回
         if not hasattr(event, "message_obj") or not hasattr(event.message_obj, "raw_message"):
             return
@@ -34,13 +36,13 @@ class MyPlugin(Star):
             group_id = raw_message.get("group_id")
             user_id = raw_message.get("user_id")
             # 发送欢迎消息
-            welcome_message = f"欢迎新成员: {user_id}！"
-            yield event.plain_result(welcome_message)
+            welcome_message = f"欢迎新成员: {user_id}！✨✨✨"
+            yield event.make_result().message(welcome_message).url_image(image_url)
 
         elif raw_message.get("notice_type") == "group_decrease":
             # 群成员减少事件
             group_id = raw_message.get("group_id")
             user_id = raw_message.get("user_id")
             # 发送告别消息
-            goodbye_message = f"成员 {user_id} 已经离开了我们！"
+            goodbye_message = f"成员 {user_id} 离开了我们！"
             yield event.plain_result(goodbye_message)
