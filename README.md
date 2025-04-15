@@ -1,8 +1,8 @@
-# helloworld
+# hello-bye
 
-AstrBot 插件模板
+AstrBot 插件
 
-A template plugin for AstrBot plugin feature
+**在新成员进群或者老成员退群时，发送一条信息提示！**
 
 # 支持
 
