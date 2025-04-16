@@ -1,3 +1,4 @@
+![:astrbot_plugin_hello-bye](https://count.getloli.com/@:astrbot_plugin_hello-bye?theme=minecraft)
 # hello-bye
 
 AstrBot 插件
