@@ -1,6 +1,8 @@
 import asyncio
 from datetime import datetime, timedelta
 
+import aiohttp
+
 from astrbot.api.event import filter, AstrMessageEvent, MessageEventResult
 from astrbot.api.star import Context, Star, register
 from astrbot.api import logger
@@ -12,20 +14,17 @@ image_url = "https://image20221016.oss-cn-shanghai.aliyuncs.com/images.jpg"
 class MyPlugin(Star):
     def __init__(self, context: Context, config: AstrBotConfig):
         super().__init__(context)
-        self.client = None
         self.is_send_welcome = config.get("is_send_welcome", False)
         self.is_send_bye = config.get("is_send_bye", True)
         self.is_debug = config.get("is_debug", False)
         self.target_groups = config.get("target_groups", [])
         self.last_day = None
-
+        self.napcat_host = config.get("napcat_host", "127.0.0.1:3000")
         # 定时任务
         self.scheduler_task = asyncio.create_task(self.scheduler_task())
 
     async def initialize(self):
         """可选择实现异步的插件初始化方法，当实例化该插件类之后会自动调用该方法。"""
-        if not hasattr(self, "client"):
-            self.client = self.context.get_platform("aiocqhttp").get_client()
 
     async def terminate(self):
         """可选择实现异步的插件销毁方法，当插件被卸载/停用时会调用。"""
@@ -75,28 +74,18 @@ class MyPlugin(Star):
 
     async def groups_sign_in(self):
         """群签到"""
-        if not hasattr(self, "client"):
-            print("==注意==: 尚未获取client，等待client获取中...")
-            while not hasattr(self, "client"):
-                await asyncio.sleep(10)
-        try:
-            if not self.target_groups:
-                if self.is_debug:
-                    logger.debug("没有指定目标群组，跳过签到")
-                return
-            for group_id in self.target_groups:
-                if self.is_debug:
-                    logger.debug("签到群组: %s", group_id)
-                # 这里可以实现签到逻辑
-                payloads = {
-                    "group_id": group_id,
-                }
-                await self.client.api.call_action("set_group_sign", **payloads)
-                if self.is_debug:
-                    logger.debug("签到成功: %s", group_id)
-        except Exception as e:
-            if self.is_debug:
-                logger.debug("签到失败: %s", str(e))
+        for group_id in self.target_groups:
+            try:
+                async with aiohttp.ClientSession() as session:
+                    async with session.get(
+                                        f"http://{self.napcat_host}/send_group_sign",
+                                        json={"group_id": group_id},) as response:
+                        if response.status == 200:
+                            logger.info(f"群 {group_id} 签到成功")
+                        else:
+                            logger.error(f"群 {group_id} 签到失败: {response.status}")
+            except Exception as e:
+                logger.error(f"群 {group_id} 签到异常: {e}")
 
     async def scheduler_task(self):
         """定时任务"""
