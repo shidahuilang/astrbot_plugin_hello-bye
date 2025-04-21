@@ -7,8 +7,9 @@ from astrbot.api.event import filter, AstrMessageEvent, MessageEventResult
 from astrbot.api.star import Context, Star, register
 from astrbot.api import logger
 from astrbot.core import AstrBotConfig
+import astrbot.api.message_components as Comp
 
-image_url = "https://image20221016.oss-cn-shanghai.aliyuncs.com/images.jpg"
+# image_url = "https://image20221016.oss-cn-shanghai.aliyuncs.com/images.jpg"
 
 @register("astrbot_plugin_hello-bye", "tinker", "一个简单的入群和退群信息提示插件", "1.0.0")
 class MyPlugin(Star):
@@ -18,6 +19,8 @@ class MyPlugin(Star):
         self.is_send_bye = config.get("is_send_bye", True)
         self.is_debug = config.get("is_debug", False)
         self.target_groups = config.get("target_groups", [])
+        self.welcome_text = config.get("welcome_text", "欢迎新成员加入！")
+        self.welcome_img = config.get("welcome_img", None)
         self.last_day = None
         self.napcat_host = config.get("napcat_host", "127.0.0.1:3000")
         # 定时任务
@@ -58,9 +61,21 @@ class MyPlugin(Star):
             group_id = raw_message.get("group_id")
             user_id = raw_message.get("user_id")
             # 发送欢迎消息
-            welcome_message = f"✨✨✨ 欢迎新成员: {user_id} 进群！"
-            # logger.info(f"群 {group_id} 新成员 {user_id} 加入 url_image: {image_url}")
-            yield event.make_result().message(welcome_message).url_image(image_url)
+
+            if self.welcome_img:
+                image_url = self.welcome_img
+                chain = [
+                    Comp.At(qq=user_id),
+                    Comp.Plain(self.welcome_text),
+                    Comp.Image.fromURL(image_url),
+                ]
+                yield event.chain_result(chain)
+            else:
+                chain = [
+                    Comp.At(qq=user_id),
+                    Comp.Plain(self.welcome_text),
+                ]
+                yield event.chain_result(chain)
 
         elif raw_message.get("notice_type") == "group_decrease":
             # 群成员减少事件
@@ -69,7 +84,7 @@ class MyPlugin(Star):
             group_id = raw_message.get("group_id")
             user_id = raw_message.get("user_id")
             # 发送告别消息
-            goodbye_message = f"成员 {user_id} 离开了我们！"
+            goodbye_message = f"群友 {user_id} 离开了我们！"
             yield event.plain_result(goodbye_message)
 
     async def groups_sign_in(self):
