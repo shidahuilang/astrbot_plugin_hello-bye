@@ -17,6 +17,17 @@
     "hint": "是否开启调试模式，默认关闭",
     "default": false
   },
+    "welcome_text": {
+    "description": "入群欢迎消息",
+    "type": "string",
+    "default": "欢迎进群，有问题先看下群公告哦~"
+  },
+  "welcome_img": {
+    "description": "入群欢迎图片",
+    "hint": "填写入群信息的图片URL地址，默认空",
+    "type": "string",
+    "default": ""
+  },
   "target_groups": {
     "description": "需要群签到的群组ID列表",
     "type": "list",
@@ -29,15 +40,10 @@
     "hint": "填写napcat服务器地址，默认127.0.0.1:3000",
     "default": "127.0.0.1:3000"
   },
-    "welcome_text": {
-    "description": "入群欢迎消息",
-    "type": "string",
-    "default": "欢迎进群，有问题先看下群公告哦~"
-  },
-  "welcome_img": {
-    "description": "入群欢迎图片",
-    "hint": "填写入群信息的图片URL地址，默认空",
-    "type": "string",
-    "default": ""
+  "groups": {
+    "description": "白名单",
+    "type": "list",
+    "hint": "填写需要发送消息的群号，如: [123456, 789012]",
+    "default": []
   }
 }

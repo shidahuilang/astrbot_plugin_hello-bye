@@ -19,6 +19,7 @@ class MyPlugin(Star):
         self.is_send_bye = config.get("is_send_bye", True)
         self.is_debug = config.get("is_debug", False)
         self.target_groups = config.get("target_groups", [])
+        self.groups = config.get("groups", [])
         self.welcome_text = config.get("welcome_text", "欢迎新成员加入！")
         self.welcome_img = config.get("welcome_img", None)
         self.last_day = None
@@ -59,6 +60,9 @@ class MyPlugin(Star):
             if not self.is_send_welcome:
                 return
             group_id = raw_message.get("group_id")
+            # 检查是否在白名单中
+            if str(group_id) not in self.groups:
+                return
             user_id = raw_message.get("user_id")
             # 发送欢迎消息
 
@@ -82,6 +86,9 @@ class MyPlugin(Star):
             if not self.is_send_bye:
                 return
             group_id = raw_message.get("group_id")
+            # 检查是否在白名单中
+            if str(group_id) not in self.groups:
+                return
             user_id = raw_message.get("user_id")
             # 发送告别消息
             goodbye_message = f"群友 {user_id} 离开了我们！"
