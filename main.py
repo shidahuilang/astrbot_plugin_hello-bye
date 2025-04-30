@@ -1,5 +1,7 @@
 import asyncio
+import json
 from datetime import datetime, timedelta
+from pathlib import Path
 
 import aiohttp
 
@@ -8,6 +10,8 @@ from astrbot.api.star import Context, Star, register
 from astrbot.api import logger
 from astrbot.core import AstrBotConfig
 import astrbot.api.message_components as Comp
+from astrbot.core.star.filter.permission import PermissionType
+
 
 # image_url = "https://image20221016.oss-cn-shanghai.aliyuncs.com/images.jpg"
 
@@ -23,6 +27,12 @@ class MyPlugin(Star):
         self.welcome_text = config.get("welcome_text", "欢迎新成员加入！")
         self.welcome_img = config.get("welcome_img", None)
         self.last_day = None
+
+        # 数据目录
+        data_dir = Path("data/hello-bye")
+        data_dir.mkdir(parents=True, exist_ok=True)
+        self.json_path = data_dir / "data.json"
+
         self.napcat_host = config.get("napcat_host", "127.0.0.1:3000")
         # 定时任务
         self.scheduler_task = asyncio.create_task(self.scheduler_task())
@@ -38,6 +48,49 @@ class MyPlugin(Star):
                 await self.scheduler_task
             except asyncio.CancelledError:
                 logger.debug("调度器任务已成功取消")
+
+
+    @filter.permission_type(filter.PermissionType.ADMIN)
+    @filter.command("设置欢迎消息", alias={"设置入群信息", "设置入群提示", "设置欢迎信息"})
+    async def set_hello_message(self, event: AstrMessageEvent, message: str):
+        """设置欢迎消息"""
+        if event.is_private_chat():
+            yield event.plain_result("请在群聊中使用此命令")
+            return
+        group_id = event.get_group_id()
+        # 在json文件中，把群号和消息存储为键值对
+        if not self.json_path.exists():
+            logger.info("数据文件不存在，创建新的数据文件")
+            with open(self.json_path, "w") as f:
+                json.dump({}, f)
+        # 读取json文件
+        with open(self.json_path, "r") as f:
+            data = json.load(f)
+
+        data[str(group_id)] = message
+        with open(self.json_path, "w") as f:
+            json.dump(data, f)
+        yield event.plain_result(f"欢迎消息已设置为：{message}")
+
+    @filter.command("查看欢迎消息", alias={"查看入群信息", "查看入群提示", "查看欢迎信息"})
+    async def get_hello_message(self, event: AstrMessageEvent):
+        """查看欢迎消息"""
+        if event.is_private_chat():
+            yield event.plain_result("请在群聊中使用此命令")
+            return
+        group_id = event.get_group_id()
+        # 读取json文件
+        if not self.json_path.exists():
+            yield event.plain_result("数据文件不存在")
+            return
+        with open(self.json_path, "r") as f:
+            data = json.load(f)
+
+        message = data.get(str(group_id), None)
+        if message:
+            yield event.plain_result(f"欢迎消息为：{message}")
+        else:
+            yield event.plain_result("没有设置欢迎消息")
 
     @filter.event_message_type(filter.EventMessageType.ALL)
     async def handle_group_add(self, event: AstrMessageEvent):
@@ -66,18 +119,26 @@ class MyPlugin(Star):
             user_id = raw_message.get("user_id")
             # 发送欢迎消息
 
+            welcome_message = self.welcome_text
+            # 检查是否有自定义欢迎消息
+            if self.json_path.exists():
+                with open(self.json_path, "r") as f:
+                    data = json.load(f)
+                    if str(group_id) in data:
+                        welcome_message = data[str(group_id)]
+
             if self.welcome_img:
                 image_url = self.welcome_img
                 chain = [
                     Comp.At(qq=user_id),
-                    Comp.Plain(self.welcome_text),
+                    Comp.Plain(welcome_message),
                     Comp.Image.fromURL(image_url),
                 ]
                 yield event.chain_result(chain)
             else:
                 chain = [
                     Comp.At(qq=user_id),
-                    Comp.Plain(self.welcome_text),
+                    Comp.Plain(welcome_message),
                 ]
                 yield event.chain_result(chain)
 
