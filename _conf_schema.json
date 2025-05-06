@@ -28,18 +28,6 @@
     "type": "string",
     "default": ""
   },
-  "target_groups": {
-    "description": "需要群签到的群组ID列表",
-    "type": "list",
-    "hint": "填写需要群签到的群号，如: [123456, 789012]",
-    "default": []
-  },
-  "napcat_host": {
-    "description": "napcat服务器地址",
-    "type": "string",
-    "hint": "填写napcat服务器地址，默认127.0.0.1:3000",
-    "default": "127.0.0.1:3000"
-  },
   "groups": {
     "description": "白名单",
     "type": "list",

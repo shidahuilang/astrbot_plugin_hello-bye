@@ -22,33 +22,20 @@ class MyPlugin(Star):
         self.is_send_welcome = config.get("is_send_welcome", False)
         self.is_send_bye = config.get("is_send_bye", True)
         self.is_debug = config.get("is_debug", False)
-        self.target_groups = config.get("target_groups", [])
         self.groups = config.get("groups", [])
         self.welcome_text = config.get("welcome_text", "欢迎新成员加入！")
         self.welcome_img = config.get("welcome_img", None)
-        self.last_day = None
 
         # 数据目录
         data_dir = Path("data/hello-bye")
         data_dir.mkdir(parents=True, exist_ok=True)
         self.json_path = data_dir / "data.json"
 
-        self.napcat_host = config.get("napcat_host", "127.0.0.1:3000")
-        # 定时任务
-        self.scheduler_task = asyncio.create_task(self.scheduler_task())
-
     async def initialize(self):
         """可选择实现异步的插件初始化方法，当实例化该插件类之后会自动调用该方法。"""
 
     async def terminate(self):
         """可选择实现异步的插件销毁方法，当插件被卸载/停用时会调用。"""
-        if hasattr(self, "scheduler_task"):
-            self.scheduler_task.cancel()
-            try:
-                await self.scheduler_task
-            except asyncio.CancelledError:
-                logger.debug("调度器任务已成功取消")
-
 
     @filter.permission_type(filter.PermissionType.ADMIN)
     @filter.command("设置欢迎消息", alias={"设置入群信息", "设置入群提示", "设置欢迎信息"})
@@ -154,33 +141,3 @@ class MyPlugin(Star):
             # 发送告别消息
             goodbye_message = f"群友 {user_id} 离开了我们！"
             yield event.plain_result(goodbye_message)
-
-    async def groups_sign_in(self):
-        """群签到"""
-        for group_id in self.target_groups:
-            try:
-                async with aiohttp.ClientSession() as session:
-                    async with session.get(
-                                        f"http://{self.napcat_host}/send_group_sign",
-                                        json={"group_id": group_id},) as response:
-                        if response.status == 200:
-                            logger.info(f"群 {group_id} 签到成功")
-                        else:
-                            logger.error(f"群 {group_id} 签到失败: {response.status}")
-            except Exception as e:
-                logger.error(f"群 {group_id} 签到异常: {e}")
-
-    async def scheduler_task(self):
-        """定时任务"""
-        # 这里可以实现定时任务的逻辑
-        while True:
-            now = datetime.utcnow() + timedelta(hours=8)
-            current_day = now.day
-            if self.is_debug:
-                logger.debug("当前时间: %s", now.isoformat())
-            if current_day != self.last_day or self.last_day is None:
-                self.last_day = current_day
-                if self.is_debug:
-                    logger.debug("调度器触发，当前日期: %s", now.isoformat())
-                await self.groups_sign_in()
-            await asyncio.sleep(1) # 每秒检查一次
