@@ -1,16 +1,12 @@
-import asyncio
 import json
-from datetime import datetime, timedelta
 from pathlib import Path
 
-import aiohttp
 
-from astrbot.api.event import filter, AstrMessageEvent, MessageEventResult
+from astrbot.api.event import filter, AstrMessageEvent
 from astrbot.api.star import Context, Star, register
 from astrbot.api import logger
 from astrbot.core import AstrBotConfig
 import astrbot.api.message_components as Comp
-from astrbot.core.star.filter.permission import PermissionType
 
 
 # image_url = "https://image20221016.oss-cn-shanghai.aliyuncs.com/images.jpg"
@@ -100,8 +96,8 @@ class MyPlugin(Star):
             if not self.is_send_welcome:
                 return
             group_id = raw_message.get("group_id")
-            # 检查是否在白名单中
-            if str(group_id) not in self.groups:
+            # 检查是否在黑名单中
+            if str(group_id) in self.groups:
                 return
             user_id = raw_message.get("user_id")
             # 发送欢迎消息
@@ -134,8 +130,8 @@ class MyPlugin(Star):
             if not self.is_send_bye:
                 return
             group_id = raw_message.get("group_id")
-            # 检查是否在白名单中
-            if str(group_id) not in self.groups:
+            # 检查是否在黑名单中
+            if str(group_id) in self.groups:
                 return
             user_id = raw_message.get("user_id")
             # 发送告别消息

@@ -29,9 +29,9 @@
     "default": ""
   },
   "groups": {
-    "description": "白名单",
+    "description": "黑名单",
     "type": "list",
-    "hint": "填写需要发送消息的群号，如: [123456, 789012]",
+    "hint": "填写不需要发送消息的群号，如: [123456, 789012]",
     "default": []
   }
 }
