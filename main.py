@@ -21,6 +21,8 @@ class MyPlugin(Star):
         self.groups = config.get("groups", [])
         self.welcome_text = config.get("welcome_text", "欢迎新成员加入！")
         self.welcome_img = config.get("welcome_img", None)
+        self.bye_text = config.get("bye_text", "群友{username}({userid})退群了!")
+        self.bye_img = config.get("bye_img", None)
 
         # 数据目录
         data_dir = Path("data/hello-bye")
@@ -134,6 +136,12 @@ class MyPlugin(Star):
             if str(group_id) in self.groups:
                 return
             user_id = raw_message.get("user_id")
-            # 发送告别消息
-            goodbye_message = f"群友 {user_id} 离开了我们！"
+            # 获取用户昵称
+            from astrbot.core.platform.sources.aiocqhttp.aiocqhttp_message_event import AiocqhttpMessageEvent
+            assert isinstance(event, AiocqhttpMessageEvent)
+            client = event.bot
+            info = await client.get_stranger_info(user_id=user_id, no_cache=True)
+            # 将用户昵称和ID替换到消息中
+            username = info.get("nickname", "未知用户")
+            goodbye_message = self.bye_text.format(username=username, userid=user_id)
             yield event.plain_result(goodbye_message)

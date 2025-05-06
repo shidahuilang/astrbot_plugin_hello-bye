@@ -17,7 +17,7 @@
     "hint": "是否开启调试模式，默认关闭",
     "default": false
   },
-    "welcome_text": {
+  "welcome_text": {
     "description": "入群欢迎消息",
     "type": "string",
     "default": "欢迎进群，有问题先看下群公告哦~"
@@ -25,6 +25,18 @@
   "welcome_img": {
     "description": "入群欢迎图片",
     "hint": "填写入群信息的图片URL地址，默认空",
+    "type": "string",
+    "default": ""
+  },
+  "bye_text": {
+    "description": "退群告别消息",
+    "type": "string",
+    "hint": "填写退群告别消息，其中 {username} 和 {userid} 会被替换为实际的昵称和qq号",
+    "default": "群友{username}({userid})退群了!"
+  },
+  "bye_img": {
+    "description": "退群告别图片",
+    "hint": "填写退群信息的图片URL地址，默认空",
     "type": "string",
     "default": ""
   },
