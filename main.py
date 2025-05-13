@@ -1,5 +1,6 @@
 import json
 import aiohttp
+import random
 from pathlib import Path
 
 
@@ -29,9 +30,9 @@ class MyPlugin(Star):
         self.is_debug = config.get("is_debug", False)
         self.groups = config.get("groups", [])
         self.welcome_text = config.get("welcome_text", "欢迎新成员加入！")
-        self.welcome_img = config.get("welcome_img", None)
+        self.welcome_img = config.get("welcome_img", [])
         self.bye_text = config.get("bye_text", "群友{username}({userid})退群了!")
-        self.bye_img = config.get("bye_img", None)
+        self.bye_img = config.get("bye_img", [])
 
         # 数据目录
         data_dir = Path("data/hello-bye")
@@ -122,7 +123,7 @@ class MyPlugin(Star):
                         welcome_message = data[str(group_id)]
 
             if self.welcome_img:
-                image_url = self.welcome_img
+                image_url = random.choice(self.welcome_img)
                 valid_image = await is_valid_image_url(image_url)
                 if valid_image:
                     chain = [
