@@ -1,4 +1,5 @@
 import json
+import aiohttp
 from pathlib import Path
 
 
@@ -10,6 +11,14 @@ import astrbot.api.message_components as Comp
 
 
 # image_url = "https://image20221016.oss-cn-shanghai.aliyuncs.com/images.jpg"
+async def is_valid_image_url(url: str):
+    try:
+        async with aiohttp.ClientSession() as session:
+            async with session.head(url, timeout=5) as response:
+                return response.status == 200
+    except Exception as e:
+        logger.error(f"Error checking image URL: {e}")
+        return False
 
 @register("astrbot_plugin_hello-bye", "tinker", "一个简单的入群和退群信息提示插件", "1.0.0")
 class MyPlugin(Star):
@@ -114,11 +123,19 @@ class MyPlugin(Star):
 
             if self.welcome_img:
                 image_url = self.welcome_img
-                chain = [
-                    Comp.At(qq=user_id),
-                    Comp.Plain(welcome_message),
-                    Comp.Image.fromURL(image_url),
-                ]
+                valid_image = await is_valid_image_url(image_url)
+                if valid_image:
+                    chain = [
+                        Comp.At(qq=user_id),
+                        Comp.Plain(welcome_message),
+                        Comp.Image.fromURL(image_url),
+                    ]
+                else:
+                    logger.warning(f"Invalid image URL: {image_url}")
+                    chain = [
+                        Comp.At(qq=user_id),
+                        Comp.Plain(welcome_message),
+                    ]
                 yield event.chain_result(chain)
             else:
                 chain = [
