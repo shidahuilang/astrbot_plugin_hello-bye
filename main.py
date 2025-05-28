@@ -28,7 +28,8 @@ class MyPlugin(Star):
         self.is_send_welcome = config.get("is_send_welcome", False)
         self.is_send_bye = config.get("is_send_bye", True)
         self.is_debug = config.get("is_debug", False)
-        self.groups = config.get("groups", [])
+        self.black_groups = config.get("black_groups", [])
+        self.white_groups = config.get("white_groups", [])
         self.welcome_text = config.get("welcome_text", "欢迎新成员加入！")
         self.welcome_img = config.get("welcome_img", [])
         self.bye_text = config.get("bye_text", "群友{username}({userid})退群了!")
@@ -87,6 +88,16 @@ class MyPlugin(Star):
         else:
             yield event.plain_result("没有设置欢迎消息")
 
+    def check_send(self, group_id: str) -> bool:
+        """检查是否发送欢迎或退群消息"""
+        # 检查黑名单
+        if self.black_groups and str(group_id) in self.black_groups:
+            return False
+        # 检查白名单
+        if self.white_groups and str(group_id) not in self.white_groups:
+            return False
+        return True
+
     @filter.event_message_type(filter.EventMessageType.ALL)
     async def handle_group_add(self, event: AstrMessageEvent):
         """处理所有类型的消息事件"""
@@ -109,7 +120,7 @@ class MyPlugin(Star):
                 return
             group_id = raw_message.get("group_id")
             # 检查是否在黑名单中
-            if str(group_id) in self.groups:
+            if not self.check_send(group_id):
                 return
             user_id = raw_message.get("user_id")
             # 发送欢迎消息
@@ -151,7 +162,7 @@ class MyPlugin(Star):
                 return
             group_id = raw_message.get("group_id")
             # 检查是否在黑名单中
-            if str(group_id) in self.groups:
+            if not self.check_send(group_id):
                 return
             user_id = raw_message.get("user_id")
             # 获取用户昵称

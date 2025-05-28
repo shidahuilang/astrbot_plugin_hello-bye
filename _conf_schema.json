@@ -40,10 +40,16 @@
     "type": "list",
     "default": []
   },
-  "groups": {
+  "black_groups": {
     "description": "黑名单",
     "type": "list",
     "hint": "填写不需要发送消息的群号，如: [123456, 789012]",
+    "default": []
+  },
+  "white_groups": {
+    "description": "白名单",
+    "type": "list",
+    "hint": "填写需要发送消息的群号，如: [123456, 789012]",
     "default": []
   }
 }
