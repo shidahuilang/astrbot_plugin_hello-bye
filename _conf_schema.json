@@ -5,6 +5,12 @@
     "hint": "是否发送入群欢迎消息，默认关闭",
     "default": false
   },
+  "is_at": {
+    "description": "是否需要at发送入群欢迎消息",
+    "type": "bool",
+    "hint": "是否需要at，默认开启",
+    "default": true
+  },
   "is_send_bye": {
     "description": "是否发送退群告别消息",
     "type": "bool",

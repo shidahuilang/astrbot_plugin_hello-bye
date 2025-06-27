@@ -26,6 +26,7 @@ class MyPlugin(Star):
     def __init__(self, context: Context, config: AstrBotConfig):
         super().__init__(context)
         self.is_send_welcome = config.get("is_send_welcome", False)
+        self.is_at = config.get("is_at", True)
         self.is_send_bye = config.get("is_send_bye", True)
         self.is_debug = config.get("is_debug", False)
         self.black_groups = config.get("black_groups", [])
@@ -138,20 +139,20 @@ class MyPlugin(Star):
                 valid_image = await is_valid_image_url(image_url)
                 if valid_image:
                     chain = [
-                        Comp.At(qq=user_id),
+                        Comp.At(qq=user_id) if self.is_at else Comp.Plain(""),
                         Comp.Plain(welcome_message),
                         Comp.Image.fromURL(image_url),
                     ]
                 else:
                     logger.warning(f"Invalid image URL: {image_url}")
                     chain = [
-                        Comp.At(qq=user_id),
+                        Comp.At(qq=user_id) if self.is_at else Comp.Plain(""),
                         Comp.Plain(welcome_message),
                     ]
                 yield event.chain_result(chain)
             else:
                 chain = [
-                    Comp.At(qq=user_id),
+                    Comp.At(qq=user_id) if self.is_at else Comp.Plain(""),
                     Comp.Plain(welcome_message),
                 ]
                 yield event.chain_result(chain)
