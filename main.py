@@ -1,4 +1,6 @@
 import json
+import os.path
+
 import aiohttp
 import random
 from pathlib import Path
@@ -136,18 +138,27 @@ class MyPlugin(Star):
 
             if self.welcome_img:
                 image_url = random.choice(self.welcome_img)
-                valid_image = await is_valid_image_url(image_url)
-                if valid_image:
-                    chain = [
-                        Comp.At(qq=user_id) if self.is_at else Comp.Plain(""),
-                        Comp.Plain(welcome_message),
-                        Comp.Image.fromURL(image_url),
-                    ]
+                # 如果是网络图片，检查是否有效
+                if image_url.startswith("http://") or image_url.startswith("https://"):
+                    valid_image = await is_valid_image_url(image_url)
+                    if valid_image:
+                        chain = [
+                            Comp.At(qq=user_id) if self.is_at else Comp.Plain(""),
+                            Comp.Plain(welcome_message),
+                            Comp.Image.fromURL(image_url),
+                        ]
+                    else:
+                        logger.warning(f"Invalid image URL: {image_url}")
+                        chain = [
+                            Comp.At(qq=user_id) if self.is_at else Comp.Plain(""),
+                            Comp.Plain(welcome_message),
+                        ]
                 else:
-                    logger.warning(f"Invalid image URL: {image_url}")
+                    # 如果是本地图片，直接使用
                     chain = [
                         Comp.At(qq=user_id) if self.is_at else Comp.Plain(""),
                         Comp.Plain(welcome_message),
+                        Comp.Image.fromFileSystem(os.path.join(Path("data/hello-bye"), image_url)),
                     ]
                 yield event.chain_result(chain)
             else:
