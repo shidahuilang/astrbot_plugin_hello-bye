@@ -6,6 +6,15 @@
 
 ## 🐔 使用说明
 **在新成员进群或者老成员退群时，发送一条信息提示！**
+
+### v1.10更新
+
+- 添加了本地图片的支持
+如下图，在你的astrbot的文件夹下中找到`data/hello-bye`文件夹，然后将你所需要的图片放入，并且记住这个图片的名字。随后到插件配置中将图片名字放入即可
+<img width="1330" height="888" alt="image" src="https://github.com/user-attachments/assets/09802538-f0d3-4e08-b74e-129f75b504bc" />
+<img width="1136" height="165" alt="image" src="https://github.com/user-attachments/assets/0de500a8-d461-41af-918a-a45dde354fd1" />
+
+
 ### v1.9更新
 - 新增配置：在发送欢迎信息的是否是否需要at，默认开启。
 ![image](https://github.com/user-attachments/assets/ec40ae32-4e31-4f11-91a8-c96fc0973e37)
