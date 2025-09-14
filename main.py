@@ -170,6 +170,29 @@ class MyPlugin(Star):
                 yield event.plain_result(f"本地图片文件不存在：{local_path}")
 
 
+    @filter.command("清除欢迎图片", alias={"删除欢迎图片", "取消欢迎图片"})
+    async def clear_hello_image(self, event: AstrMessageEvent):
+        if event.is_private_chat():
+            yield event.plain_result("请在群聊中使用此命令")
+            return
+
+        group_id = str(event.get_group_id())
+
+        if not self.json_path.exists():
+            yield event.plain_result("数据文件不存在")
+            return
+
+        with open(self.json_path, "r") as f:
+            data = json.load(f)
+
+        if group_id in data and isinstance(data[group_id], dict):
+            data[group_id].pop("welcome_img", None)
+
+        with open(self.json_path, "w") as f:
+            json.dump(data, f, ensure_ascii=False)
+
+        yield event.plain_result("欢迎图片已清除")
+    
     @filter.event_message_type(filter.EventMessageType.ALL)
     async def handle_group_add(self, event: AstrMessageEvent):
         """处理入群和退群事件"""
